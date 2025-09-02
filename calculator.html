@@ -1,128 +1,264 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Calculator</title>
-  <style>
-    body {
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      height: 100vh;
-      background: #f1f1f1;
-      font-family: Arial, sans-serif;
-    }
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Calculator</title>
+<style>
+  :root{
+    --bg:#f3f4f6;
+    --calc-bg:#1f2937;
+    --display-bg:#0f1724;
+    --btn-dark:#3b3f46;
+    --btn-light:#e6e7ea;
+    --op:#ff9500;
+    --accent:#34c759;
+    --danger:#ef4444;
+    --glass: rgba(255,255,255,0.04);
+  }
 
-    .calculator {
-      background: #222;
-      padding: 20px;
-      border-radius: 20px;
-      box-shadow: 0px 5px 15px rgba(0,0,0,0.5);
-    }
+  *{box-sizing:border-box}
+  html,body{
+    height:100%;
+    margin:0;
+    font-family: Inter, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+    background: linear-gradient(180deg,var(--bg),#e9eef5);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    padding:20px;
+  }
 
-    .calculator input {
-      width: 100%;
-      height: 60px;
-      text-align: right;
-      margin-bottom: 20px;
-      font-size: 2rem;
-      border: none;
-      border-radius: 10px;
-      padding: 10px;
-      outline: none;
-      background: #333;
-      color: #fff;
-    }
+  .calculator{
+    width: 360px;
+    max-width: calc(100vw - 32px);
+    background: linear-gradient(180deg,var(--calc-bg), #111827);
+    border-radius:22px;
+    padding:22px;
+    box-shadow: 0 12px 30px rgba(2,6,23,0.6);
+  }
 
-    .buttons {
-      display: grid;
-      grid-template-columns: repeat(4, 70px);
-      grid-gap: 15px;
-      justify-content: center;
-    }
+  /* Display */
+  #display{
+    width:100%;
+    height:78px;
+    border-radius:14px;
+    border: none;
+    padding: 16px;
+    font-size: 2.1rem;
+    text-align: right;
+    background: linear-gradient(180deg,var(--display-bg), #071127);
+    color: #ffffff;
+    box-shadow: inset 0 -6px 18px rgba(0,0,0,0.6);
+    letter-spacing: 0.6px;
+    outline: none;
+  }
 
-    .buttons button {
-      height: 70px;
-      border: none;
-      border-radius: 15px;
-      font-size: 1.5rem;
-      cursor: pointer;
-      transition: 0.2s;
-    }
+  /* Buttons grid */
+  .buttons{
+    margin-top:18px;
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    grid-auto-rows: 66px;
+    gap:12px;
+  }
 
-    .buttons button:hover {
-      opacity: 0.8;
-    }
+  .btn{
+    border: none;
+    border-radius:12px;
+    font-size:1.25rem;
+    cursor:pointer;
+    outline: none;
+    box-shadow: 0 6px 12px rgba(2,6,23,0.45);
+    transition: transform .06s ease, opacity .08s ease;
+    user-select: none;
+  }
+  .btn:active{ transform: translateY(2px) scale(.998); }
 
-    .number {
-      background: #444;
-      color: #fff;
-    }
+  .btn.number{ background: var(--btn-dark); color: #fff; }
+  .btn.func{ background: var(--btn-light); color: #111827; font-weight:600; }
+  .btn.operator{ background: var(--op); color:white; font-weight:600; }
+  .btn.equal{ background: var(--accent); color:white; font-weight:700; grid-column: 4 / 5; grid-row: 5 / 6; }
+  .btn.clear{ background: var(--btn-light); color: #111827; font-weight:700; }
+  .btn.del{ background: var(--glass); color: #fff; border: 1px solid rgba(255,255,255,0.04); }
 
-    .operator {
-      background: #ff9500;
-      color: #fff;
-    }
+  /* make 0 span two columns */
+  .btn.zero{ grid-column: 1 / 3; }
 
-    .clear {
-      background: #d9534f;
-      color: #fff;
-    }
-
-    .equal {
-      background: #28a745;
-      color: #fff;
-      grid-column: span 2;
-    }
-  </style>
+  /* responsive tweaks */
+  @media (max-width:420px){
+    #display{ height:72px; font-size:1.8rem; }
+    .buttons{ grid-auto-rows:60px; gap:10px; }
+  }
+</style>
 </head>
 <body>
-  <div class="calculator">
-    <input type="text" id="display" readonly>
+  <div class="calculator" role="application" aria-label="Calculator">
+    <input id="display" readonly aria-label="Calculator display" value="" />
     <div class="buttons">
-      <button class="clear" onclick="clearDisplay()">C</button>
-      <button class="operator" onclick="appendValue('/')">÷</button>
-      <button class="operator" onclick="appendValue('*')">×</button>
-      <button class="operator" onclick="appendValue('-')">−</button>
+      <!-- Row 1 -->
+      <button class="btn clear" onclick="clearAll()" aria-label="Clear (C)">C</button>
+      <button class="btn del" onclick="backspace()" aria-label="Delete">DEL</button>
+      <button class="btn func" onclick="pressOperator('%')" aria-label="Modulo">%</button>
+      <button class="btn operator" onclick="pressOperator('÷')" aria-label="Divide">÷</button>
 
-      <button class="number" onclick="appendValue('7')">7</button>
-      <button class="number" onclick="appendValue('8')">8</button>
-      <button class="number" onclick="appendValue('9')">9</button>
-      <button class="operator" onclick="appendValue('+')">+</button>
+      <!-- Row 2 -->
+      <button class="btn number" onclick="press('7')">7</button>
+      <button class="btn number" onclick="press('8')">8</button>
+      <button class="btn number" onclick="press('9')">9</button>
+      <button class="btn operator" onclick="pressOperator('×')">×</button>
 
-      <button class="number" onclick="appendValue('4')">4</button>
-      <button class="number" onclick="appendValue('5')">5</button>
-      <button class="number" onclick="appendValue('6')">6</button>
-      <button class="equal" onclick="calculate()">=</button>
+      <!-- Row 3 -->
+      <button class="btn number" onclick="press('4')">4</button>
+      <button class="btn number" onclick="press('5')">5</button>
+      <button class="btn number" onclick="press('6')">6</button>
+      <button class="btn operator" onclick="pressOperator('−')">−</button>
 
-      <button class="number" onclick="appendValue('1')">1</button>
-      <button class="number" onclick="appendValue('2')">2</button>
-      <button class="number" onclick="appendValue('3')">3</button>
+      <!-- Row 4 -->
+      <button class="btn number" onclick="press('1')">1</button>
+      <button class="btn number" onclick="press('2')">2</button>
+      <button class="btn number" onclick="press('3')">3</button>
+      <button class="btn operator" onclick="pressOperator('+')">+</button>
 
-      <button class="number" style="grid-column: span 2;" onclick="appendValue('0')">0</button>
-      <button class="number" onclick="appendValue('.')">.</button>
+      <!-- Row 5 -->
+      <button class="btn number zero" onclick="press('0')">0</button>
+      <button class="btn number" onclick="press('.')">.</button>
+      <button class="btn equal" onclick="calculate()" aria-label="Equals">=</button>
     </div>
   </div>
 
-  <script>
-    let display = document.getElementById("display");
+<script>
+  const displayEl = document.getElementById('display');
 
-    function appendValue(value) {
-      display.value += value;
-    }
+  // Internal JS expression (uses JS arithmetic tokens), and displayValue for UI (uses × ÷ − etc.)
+  let expr = '';        // string used for eval (e.g. "12*3/2")
+  let shown = '';       // string shown in display (e.g. "12×3÷2")
 
-    function clearDisplay() {
-      display.value = "";
-    }
+  // Map visible operator -> JS operator
+  const opMap = { '×':'*', '÷':'/', '−':'-', '+':'+', '%':'%' };
+  const evalOperators = Object.values(opMap);
 
-    function calculate() {
-      try {
-        display.value = eval(display.value);
-      } catch {
-        display.value = "Error";
+  function updateDisplay(){
+    displayEl.value = shown || '0';
+  }
+
+  function isEvalOperator(ch){
+    return evalOperators.includes(ch);
+  }
+
+  function lastChar(str){
+    return str.length ? str[str.length-1] : '';
+  }
+
+  // Append numbers or decimal
+  function press(digit){
+    // prevent two decimals in same numeric segment
+    if(digit === '.'){
+      // find last numeric chunk in expr
+      const parts = expr.split(/[\+\-\*\/\%]/);
+      const last = parts[parts.length - 1] || '';
+      if(last.includes('.')) return; // ignore second dot in same number
+      // if last is empty (start or after operator), prepend 0
+      if(last === '') {
+        expr += '0';
+        shown += '0';
       }
     }
-  </script>
+    expr += digit;
+    shown += digit;
+    updateDisplay();
+  }
+
+  // Append operator (visibleSymbol like '×', '÷', '−', '+', '%')
+  function pressOperator(visible){
+    const evalOp = opMap[visible];
+
+    // if empty and user presses operator: allow '-' to start negative numbers, otherwise ignore
+    if(!expr){
+      if(evalOp === '-') {
+        expr = '-';
+        shown = '−';
+        updateDisplay();
+      }
+      return;
+    }
+
+    // if last char in expr is an operator, replace it (so we don't stack operators)
+    const last = lastChar(expr);
+    if(isEvalOperator(last)){
+      // replace last operator
+      expr = expr.slice(0, -1) + evalOp;
+      // replace shown's last visible operator
+      shown = shown.slice(0, -1) + visible;
+    } else {
+      expr += evalOp;
+      shown += visible;
+    }
+    updateDisplay();
+  }
+
+  // Clear all
+  function clearAll(){
+    expr = '';
+    shown = '';
+    updateDisplay();
+  }
+
+  // Backspace / delete
+  function backspace(){
+    if(!expr) return;
+    expr = expr.slice(0, -1);
+    shown = shown.slice(0, -1);
+    updateDisplay();
+  }
+
+  // Evaluate expression safely using Function constructor
+  function calculate(){
+    if(!expr) return;
+    // if last char is operator, remove it before evaluating
+    while(expr && isEvalOperator(lastChar(expr))) {
+      expr = expr.slice(0, -1);
+      shown = shown.slice(0, -1);
+    }
+    try {
+      // Evaluate
+      // Use Function constructor rather than eval directly (slightly safer in this context)
+      // Note: this is a simple calculator for demo; disallow unexpected characters:
+      if(!/^[0-9\.\+\-\*\/\%\(\)\s]+$/.test(expr)) {
+        throw new Error('Invalid input');
+      }
+      const result = Function('"use strict";return (' + expr + ')')();
+      // Format result: remove trailing ".0" when integer-ish
+      const pretty = Number.isFinite(result) ? (Math.round(result) === result ? String(result) : String(Number(result.toFixed(12)).toString())) : 'Error';
+      expr = String(pretty);
+      shown = expr;
+      updateDisplay();
+    } catch(e){
+      shown = 'Error';
+      expr = '';
+      updateDisplay();
+      // Clear the error after a short delay so user can continue typing (optional)
+      setTimeout(()=> { if(displayEl.value === 'Error'){ clearAll(); } }, 1000);
+    }
+  }
+
+  // initialize
+  updateDisplay();
+
+  // Optional: support keyboard input (basic)
+  window.addEventListener('keydown', (e) => {
+    if(e.key >= '0' && e.key <= '9') press(e.key);
+    else if(e.key === '.') press('.');
+    else if(e.key === 'Backspace') backspace();
+    else if(e.key === 'Enter' || e.key === '=') calculate();
+    else if(e.key === '+' ) pressOperator('+');
+    else if(e.key === '-' ) pressOperator('−');
+    else if(e.key === '*' ) pressOperator('×');
+    else if(e.key === '/' ) pressOperator('÷');
+    else if(e.key === '%') pressOperator('%');
+    // prevent default Enter form submission
+    if(['Enter','Backspace'].includes(e.key)) e.preventDefault();
+  });
+</script>
 </body>
 </html>
